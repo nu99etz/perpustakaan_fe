@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+* {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.nav-link.active {
+    background: #6366f1;
+    color: #fff;
+}
+
+.nav-link.active svg {
+    stroke: #fff;
+}
+
+.dark .nav-link.active {
+    background: #6366f1;
+}
+
+.nav-link:not(.active):hover {
+    background: #f1f5f9;
+}
+
+.dark .nav-link:not(.active):hover {
+    background: #1e293b;
+}
+
+.bnav-item {
+    position: relative;
+    overflow: hidden;
+}
+
+.bnav-item.active .bnav-icon {
+    color: #6366f1;
+}
+
+.bnav-item.active .bnav-label {
+    color: #6366f1;
+    font-weight: 600;
+}
+
+.bnav-item:not(.active) .bnav-icon {
+    color: #94a3b8;
+}
+
+.bnav-item:not(.active) .bnav-label {
+    color: #94a3b8;
+}
+
+.bnav-item::after {
+    content: '';
+    position: absolute;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, .12);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform .3s ease;
+}
+
+.bnav-item:active::after {
+    transform: translate(-50%, -50%) scale(1.5);
+}
+
+.stat-card {
+    transition: transform .2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+/* dropdown animation */
+.drop {
+    transform-origin: top right;
+    transition: opacity .18s ease, transform .18s ease;
+}
+
+.drop.closed {
+    opacity: 0;
+    transform: scale(.95) translateY(-6px);
+    pointer-events: none;
+}
+
+.drop.open {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    pointer-events: auto;
+}
+
+/* toggle pill */
+.tpill {
+    transition: background .25s;
+}
+
+.tthumb {
+    transition: transform .25s;
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background: #334155;
+}

@@ -23,6 +23,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    children
+    <html lang="id" className="">
+        <body className="bg-slate-100 dark:bg-slate-900 min-h-screen transition-colors duration-300">
+            {children}
+        </body>
+    </html>
   );
 }

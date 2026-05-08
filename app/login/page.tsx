@@ -1,24 +1,68 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Swal from "sweetalert2";
+import { UserController } from "../dashboard/master/controller/usercontroller";
 
 export default function LoginPage() {
+    const router = useRouter();
+
     interface ErrorValidationLogin {
-        email?: string;
+        username?: string;
         password?: string;
     }
 
-    const [isLoading, loadingState] = useState(false)
-    const [validationError, validationState] = useState<ErrorValidationLogin>()
+    interface InputLogin {
+        username?: string;
+        password?: string;
+    }
+
+    const [isLoading, loadingState] = useState(false);
+    const [validationError, validationState] = useState<ErrorValidationLogin>();
+    const [inputLogin, inputLoginState] = useState<InputLogin>({
+        username: "",
+        password: ""
+    });
 
     async function submitLogin(formData: FormData) {
-        loadingState(true)
-        console.log(formData.get('email'))
-        validationState({
-            email: "Email tidak boleh kosong.",
-            password: "Kata sandi tidak boleh kosong."
-        })
-        loadingState(false)
+        loadingState(true);
+        let validationError: ErrorValidationLogin = {
+            username: undefined,
+            password: undefined
+        }
+        if (formData.get('username') === undefined || formData.get('username') === "") {
+            validationError.username = "Username tidak boleh kosong."
+        }
+
+        if (formData.get('password') === undefined || formData.get('password') === "") {
+            validationError.password = "Kata sandi tidak boleh kosong."
+        }
+
+        if (validationError.username !== undefined || validationError.password !== undefined) {
+            validationState(validationError)
+            loadingState(false);
+            return;
+        }
+
+        await UserController.submitLogin(formData, (data: any) => {
+            if(data['error'] !== undefined) {
+                Swal.fire({
+                    title: "Error",
+                    text: data['error'],
+                    icon: 'error'
+                })
+            } else {
+                console.log(data);
+                Swal.fire({
+                    title: "Success",
+                    text: data['message'],
+                    icon: 'success'
+                }).then(() => {
+                    router.replace('/dashboard')
+                })
+            }
+        });
+        loadingState(false);
     }
 
     return (
@@ -50,12 +94,14 @@ export default function LoginPage() {
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
                                     </div>
-                                    <input id="email" type="email" placeholder="admin@analytica.id" name="email"
+                                    <input type="text" placeholder="Username" name="username"
                                         className="inp w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white text-sm placeholder-slate-400"
-                                        autoComplete="email" />
+                                        autoComplete="email" value={inputLogin?.username} onChange={(e) => inputLoginState({
+                                            username: e.target.value
+                                        })} />
                                 </div>
                                 {
-                                    validationError != undefined && validationError.email != undefined ? <p className="text-xs text-red-500 mt-1">{validationError.email}</p> : ''
+                                    validationError != undefined && validationError.username != undefined ? <p className="text-xs text-red-500 mt-1">{validationError.username}</p> : ''
                                 }
                             </div>
 
@@ -69,7 +115,7 @@ export default function LoginPage() {
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
                                     </div>
-                                    <input id="password" type="password" placeholder="••••••••"
+                                    <input id="password" type="password" placeholder="••••••••" name="password"
                                         className="inp w-full pl-10 pr-11 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white text-sm placeholder-slate-400"
                                         autoComplete="current-password" />
                                     <button type="button" id="toggle-pw" className="absolute inset-y-0 right-0 pr-3 flex items-center">
@@ -92,12 +138,6 @@ export default function LoginPage() {
                                 <label className="text-sm text-slate-600 dark:text-slate-400 cursor-pointer select-none">Ingat saya selama 30 hari</label>
                             </div>
 
-                            {/* <!-- Error alert --> */}
-                            <div id="form-err" className="hidden bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 flex items-center gap-2.5">
-                                <svg className="w-4 h-4 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126z" /></svg>
-                                <p className="text-sm text-red-600 dark:text-red-400">Email atau kata sandi tidak valid.</p>
-                            </div>
-
                             {/* <!-- Submit button --> */}
 
                             <button type="submit" id="submit-btn" disabled={isLoading}
@@ -107,7 +147,7 @@ export default function LoginPage() {
                                 {
                                     !isLoading ? <svg id="btn-arrow" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg> : <svg id="btn-spin" className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                                 }
-                                
+
                                 {/* <!-- Spinner (hidden by default) --> */}
                             </button>
                         </form>
@@ -115,7 +155,10 @@ export default function LoginPage() {
                         {/* <!-- Register link --> */}
                         <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
                             Belum punya akun?
-                            <a href="#" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Daftar sekarang</a>
+                            <a href="#" onClick={(e) => {
+                                e.preventDefault();
+                                router.push('/register');
+                            }} className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Daftar sekarang</a>
                         </p>
 
                         {/* <!-- Footer note --> */}
