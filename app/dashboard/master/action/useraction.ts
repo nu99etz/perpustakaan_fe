@@ -21,8 +21,9 @@ interface ServerActionResult {
     };
 }
 
+const token = (await cookies()).get('token')?.value
+
 export async function getAllUsers(): Promise<User[]> {
-    const token = (await cookies()).get('token')?.value
     console.log(`token ${token}`);
     const res = await fetch("http://localhost:8080/user", {
         method: "GET",
@@ -60,10 +61,11 @@ export async function createUserAction(prevState: any, formData: FormData): Prom
         return { status: false, error: { field: 'password', message: 'Password tidak boleh kosong.' } };
     }
 
-    const res = await fetch("http://localhost:8080/user", {
+    const res = await fetch("http://localhost:8080/user/create", {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
             user_name,
@@ -114,7 +116,8 @@ export async function updateUserAction(prevState: any, formData: FormData): Prom
     const res = await fetch(`http://localhost:8080/user/${id}`, {
         method: "PUT",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
             user_name,
@@ -147,7 +150,8 @@ export async function deleteUserAction(prevState: any, formData: FormData): Prom
     const res = await fetch(`http://localhost:8080/user/${id}`, {
         method: "DELETE",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
         }
     });
 
