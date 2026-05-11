@@ -3,7 +3,6 @@ import "./dashboard.css";
 import Sidebar from "./components/sidebar";
 import Header from "./components/header";
 import BottomNav from "./components/bottomnav";
-import { NextResponse } from "next/server";
 
 export const metadata: Metadata = {
   title: "Dashboard",

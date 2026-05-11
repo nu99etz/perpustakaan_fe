@@ -1,69 +1,44 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import { UserController } from "../dashboard/master/controller/usercontroller";
+import { loginAction } from "../dashboard/master/action/loginaction";
+import { useRouter } from "next/navigation";
+
+interface LoginInput {
+
+}
+
+interface LoginValidation {
+    email?: string,
+    password?: string
+}
 
 export default function LoginPage() {
+    const [state, formAction, isPending] = useActionState(loginAction, null);
     const router = useRouter();
 
-    interface ErrorValidationLogin {
-        username?: string;
-        password?: string;
-    }
+    useEffect(() => {
+        if (!state) return;
 
-    interface InputLogin {
-        username?: string;
-        password?: string;
-    }
-
-    const [isLoading, loadingState] = useState(false);
-    const [validationError, validationState] = useState<ErrorValidationLogin>();
-    const [inputLogin, inputLoginState] = useState<InputLogin>({
-        username: "",
-        password: ""
-    });
-
-    async function submitLogin(formData: FormData) {
-        loadingState(true);
-        let validationError: ErrorValidationLogin = {
-            username: undefined,
-            password: undefined
-        }
-        if (formData.get('username') === undefined || formData.get('username') === "") {
-            validationError.username = "Username tidak boleh kosong."
-        }
-
-        if (formData.get('password') === undefined || formData.get('password') === "") {
-            validationError.password = "Kata sandi tidak boleh kosong."
-        }
-
-        if (validationError.username !== undefined || validationError.password !== undefined) {
-            validationState(validationError)
-            loadingState(false);
+        if (state.status === false && state?.error?.errorMessage) {
+            Swal.fire({
+                title: "Error",
+                text: state.error.errorMessage,
+                icon: 'error'
+            });
             return;
         }
 
-        await UserController.submitLogin(formData, (data: any) => {
-            if(data['error'] !== undefined) {
-                Swal.fire({
-                    title: "Error",
-                    text: data['error'],
-                    icon: 'error'
-                })
-            } else {
-                console.log(data);
-                Swal.fire({
-                    title: "Success",
-                    text: data['message'],
-                    icon: 'success'
-                }).then(() => {
-                    router.replace('/dashboard')
-                })
-            }
-        });
-        loadingState(false);
-    }
+        if (state.status === true) {
+            Swal.fire({
+                title: "Success",
+                text: state?.success?.successMessage,
+                icon: 'success'
+            }).then(() => {
+                router.push('/dashboard');
+            });
+        }
+    }, [state, router]);
 
     return (
         <div>
@@ -85,7 +60,7 @@ export default function LoginPage() {
                         </div>
 
                         {/* <!-- Form --> */}
-                        <form id="login-form" noValidate className="space-y-4" action={submitLogin}>
+                        <form id="login-form" noValidate className="space-y-4" action={formAction}>
 
                             {/* <!-- Email --> */}
                             <div>
@@ -96,12 +71,10 @@ export default function LoginPage() {
                                     </div>
                                     <input type="text" placeholder="Username" name="username"
                                         className="inp w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white text-sm placeholder-slate-400"
-                                        autoComplete="email" value={inputLogin?.username} onChange={(e) => inputLoginState({
-                                            username: e.target.value
-                                        })} />
+                                        autoComplete="email" />
                                 </div>
                                 {
-                                    validationError != undefined && validationError.username != undefined ? <p className="text-xs text-red-500 mt-1">{validationError.username}</p> : ''
+                                    state?.error?.email != undefined && state?.error?.email != undefined ? <p className="text-xs text-red-500 mt-1">{state?.error?.email}</p> : ''
                                 }
                             </div>
 
@@ -126,7 +99,7 @@ export default function LoginPage() {
                                     </button>
                                 </div>
                                 {
-                                    validationError != undefined && validationError.password != undefined ? <p className="text-xs text-red-500 mt-1">{validationError.password}</p> : ''
+                                    state?.error?.password != undefined && state?.error?.password != undefined ? <p className="text-xs text-red-500 mt-1">{state?.error?.password}</p> : ''
                                 }
                             </div>
 
@@ -140,12 +113,12 @@ export default function LoginPage() {
 
                             {/* <!-- Submit button --> */}
 
-                            <button type="submit" id="submit-btn" disabled={isLoading}
-                                className={`btn-shine w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 mt-2 shadow-md shadow-indigo-200 dark:shadow-indigo-900 ${isLoading ? 'opacity-30' : ''}`}>
+                            <button type="submit" id="submit-btn" disabled={isPending}
+                                className={`btn-shine w-full bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 mt-2 shadow-md shadow-indigo-200 dark:shadow-indigo-900 ${isPending ? 'opacity-30' : ''}`}>
                                 <span id="btn-text">Masuk ke Dashboard</span>
 
                                 {
-                                    !isLoading ? <svg id="btn-arrow" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg> : <svg id="btn-spin" className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                                    !isPending ? <svg id="btn-arrow" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg> : <svg id="btn-spin" className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                                 }
 
                                 {/* <!-- Spinner (hidden by default) --> */}
@@ -153,13 +126,13 @@ export default function LoginPage() {
                         </form>
 
                         {/* <!-- Register link --> */}
-                        <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
+                        {/* <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-6">
                             Belum punya akun?
                             <a href="#" onClick={(e) => {
                                 e.preventDefault();
                                 router.push('/register');
                             }} className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">Daftar sekarang</a>
-                        </p>
+                        </p> */}
 
                         {/* <!-- Footer note --> */}
                         <p className="text-center text-xs text-slate-400 mt-8">
