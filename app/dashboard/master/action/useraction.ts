@@ -24,7 +24,6 @@ interface ServerActionResult {
 const token = (await cookies()).get('token')?.value
 
 export async function getAllUsers(): Promise<User[]> {
-    console.log(`token ${token}`);
     const res = await fetch("http://localhost:8080/user", {
         method: "GET",
         headers: {
@@ -35,11 +34,19 @@ export async function getAllUsers(): Promise<User[]> {
     });
 
     const data = await res.json();
-    console.log(data);
     if(data['error'] != undefined && data['error'] == 'Token tidak valid!') {
         return [];
     }
-    return data?.data ?? data?.users ?? data ?? [];
+    let users: User[] = [];
+    for(let i = 0; i < data?.length; i++) {
+        users.push({
+            id: data[i]['id'],
+            user_name: data[i]['user_name'],
+            name: data[i]['nama_lengkap_user'],
+            address: data[i]['alamat']
+        })
+    }
+    return users;
 }
 
 export async function createUserAction(prevState: any, formData: FormData): Promise<ServerActionResult> {
@@ -68,10 +75,10 @@ export async function createUserAction(prevState: any, formData: FormData): Prom
             "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({
-            user_name,
-            name,
-            address,
-            password
+            user_name: user_name,
+            nama_lengkap_user: name,
+            alamat: address,
+            password: password
         })
     });
 
