@@ -6,11 +6,11 @@ import Swal from "sweetalert2";
 import { useActionState } from "react";
 import {
     createUserAction,
-    updateUserAction,
     deleteUserAction,
     type User,
     getUserById
 } from "../action/useraction";
+import Pagination from "../../components/pagination";
 
 interface UserCrudProps {
     initialUsers: User[];
@@ -34,7 +34,6 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
     const [loadingUser, setLoadingUser] = useState(false);
 
     const [createState, createAction, createPending] = useActionState(createUserAction, null);
-    const [updateState, updateAction, updatePending] = useActionState(updateUserAction, null);
     const [deleteState, deleteAction, deletePending] = useActionState(deleteUserAction, null);
 
     useEffect(() => {
@@ -56,21 +55,6 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
             });
         }
     }, [createState]);
-
-    useEffect(() => {
-        if (!updateState) return;
-
-        if (updateState.status === false && updateState.error?.message) {
-            Swal.fire("Error", updateState.error.message, "error");
-            return;
-        }
-
-        if (updateState.status === true && updateState.success?.user) {
-            setUsers(prev => prev.map(user => user.id === updateState.success!.user!.id ? updateState.success!.user! : user));
-            closeModal();
-            Swal.fire("Sukses", updateState.success.successMessage ?? "User diperbarui.", "success");
-        }
-    }, [updateState]);
 
     useEffect(() => {
         if (!deleteState) return;
@@ -206,10 +190,10 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <button
                                     type="submit"
-                                    disabled={createPending || updatePending}
+                                    disabled={createPending}
                                     className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-50"
                                 >
-                                    {editing ? (updatePending ? "Menyimpan..." : "Perbarui User") : (createPending ? "Menyimpan..." : "Buat User")}
+                                    {editing ? (createPending ? "Menyimpan..." : "Perbarui User") : (createPending ? "Menyimpan..." : "Buat User")}
                                 </button>
                                 <button
                                     type="button"
@@ -289,6 +273,8 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
                             </tbody>
                         </table>
                     </div>
+                    {/* Pagination Layout */}
+                    <Pagination></Pagination>
                 </section>
             </div>
         </div>

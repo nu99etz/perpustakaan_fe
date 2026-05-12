@@ -24,7 +24,7 @@ interface ServerActionResult {
 
 export async function getAllUsers(): Promise<User[]> {
     const data = await globalFn().send({
-        url: "http://localhost:8080/user",
+        url: "http://localhost:8080/user?page=1&limit=5",
         method: "GET"
     });
     if (data['error'] != undefined && data['error'] == 'Token tidak valid!') {
@@ -67,7 +67,7 @@ export async function createUserAction(prevState: any, formData: FormData): Prom
     const name = String(formData.get('name') ?? '').trim();
     const address = String(formData.get('address') ?? '').trim();
     const password = String(formData.get('password') ?? '').trim();
-    const id = formData.get("id") ?? undefined
+    const id = formData.get("id") ? String(formData.get("id")) : undefined;
 
     if (!user_name) {
         return { status: false, error: { field: 'user_name', message: 'Username tidak boleh kosong.' } };
@@ -91,15 +91,13 @@ export async function createUserAction(prevState: any, formData: FormData): Prom
     if (id != undefined) {
         data = {
             ...data,
-            // id_user: parseInt(id)
+            id_user: parseInt(id)
         }
     }
 
-    console.log(data);
-
     const response = await globalFn().send({
-        url: "http://localhost:8080/user/create",
-        method: "POST",
+        url: id != undefined ? "http://localhost:8080/user/update" : "http://localhost:8080/user/create",
+        method: id != undefined ? "PUT" : "POST",
         data: JSON.stringify(data)
     })
 
@@ -117,53 +115,6 @@ export async function createUserAction(prevState: any, formData: FormData): Prom
                 name,
                 address
             }
-        }
-    };
-}
-
-export async function updateUserAction(prevState: any, formData: FormData): Promise<ServerActionResult> {
-    const token = (await cookies()).get('token')?.value
-    const id = String(formData.get('id') ?? '').trim();
-    const user_name = String(formData.get('user_name') ?? '').trim();
-    const name = String(formData.get('name') ?? '').trim();
-    const address = String(formData.get('address') ?? '').trim();
-
-    if (!id) {
-        return { status: false, error: { message: 'ID user tidak ditemukan.' } };
-    }
-    if (!user_name) {
-        return { status: false, error: { field: 'user_name', message: 'Username tidak boleh kosong.' } };
-    }
-    if (!name) {
-        return { status: false, error: { field: 'name', message: 'Nama user tidak boleh kosong.' } };
-    }
-    if (!address) {
-        return { status: false, error: { field: 'address', message: 'Alamat tidak boleh kosong.' } };
-    }
-
-    const res = await fetch(`http://localhost:8080/user/${id}`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({
-            user_name,
-            name,
-            address
-        })
-    });
-
-    const data = await res.json();
-    if (!res.ok || data?.error) {
-        return { status: false, error: { message: data?.error ?? 'Gagal memperbarui user.' } };
-    }
-
-    return {
-        status: true,
-        success: {
-            successMessage: data?.message ?? 'User berhasil diperbarui.',
-            user: data?.data ?? data?.user ?? { id, user_name, name, address }
         }
     };
 }
