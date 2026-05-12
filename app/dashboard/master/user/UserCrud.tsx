@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { useActionState } from "react";
 import {
     createUserAction,
     updateUserAction,
     deleteUserAction,
-    type User
+    type User,
+    getUserById
 } from "../action/useraction";
 
 interface UserCrudProps {
@@ -23,15 +25,21 @@ const emptyForm = {
 };
 
 export default function UserCrud({ initialUsers }: UserCrudProps) {
+    const router = useRouter();
     const [users, setUsers] = useState<User[]>(initialUsers);
     const [formValues, setFormValues] = useState({ ...emptyForm });
     const [editing, setEditing] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [closing, setClosing] = useState(false);
+    const [loadingUser, setLoadingUser] = useState(false);
 
     const [createState, createAction, createPending] = useActionState(createUserAction, null);
     const [updateState, updateAction, updatePending] = useActionState(updateUserAction, null);
     const [deleteState, deleteAction, deletePending] = useActionState(deleteUserAction, null);
+
+    useEffect(() => {
+        setUsers(initialUsers);
+    }, [initialUsers]);
 
     useEffect(() => {
         if (!createState) return;
@@ -42,9 +50,10 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
         }
 
         if (createState.status === true && createState.success?.user) {
-            setUsers(prev => [...prev, createState.success!.user!]);
             closeModal();
-            Swal.fire("Sukses", createState.success.successMessage ?? "User dibuat.", "success");
+            Swal.fire("Sukses", createState.success.successMessage ?? "User dibuat.", "success").then(() => {
+                router.refresh();
+            });
         }
     }, [createState]);
 
@@ -81,17 +90,25 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
         setFormValues(prev => ({ ...prev, [field]: value }));
     }
 
-    function startEdit(user: User) {
-        setFormValues({
-            id: user.id,
-            user_name: user.user_name,
-            name: user.name,
-            address: user.address,
-            password: ""
-        });
-        setEditing(true);
+    async function startEdit(userId: string) {
+        setLoadingUser(true);
         setClosing(false);
-        setShowModal(true);
+        try {
+            const user = await getUserById(userId);
+            setFormValues({
+                id: user?.id ?? userId,
+                user_name: user?.user_name ?? "",
+                name: user?.name ?? "",
+                address: user?.address ?? "",
+                password: ""
+            });
+            setEditing(true);
+            setShowModal(true);
+        } catch (error: any) {
+            Swal.fire("Error", error?.message ?? "Gagal mengambil data user.", "error");
+        } finally {
+            setLoadingUser(false);
+        }
     }
 
     function openCreateModal() {
@@ -140,7 +157,7 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
                                 ✕
                             </button>
                         </div>
-                        <form action={editing ? updateAction : createAction} className="space-y-4">
+                        <form action={createAction} className="space-y-4">
                             <input type="hidden" name="id" value={formValues.id} />
                             <div>
                                 <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Username</label>
@@ -243,8 +260,9 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
                                         <td className="px-5 py-3 space-x-2">
                                             <button
                                                 type="button"
-                                                onClick={() => startEdit(user)}
-                                                className="rounded-xl border border-indigo-500 px-3 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 dark:border-indigo-400 dark:text-indigo-300 dark:hover:bg-indigo-900/40"
+                                                onClick={() => startEdit(user.id)}
+                                                disabled={loadingUser}
+                                                className="rounded-xl border border-indigo-500 px-3 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-400 dark:text-indigo-300 dark:hover:bg-indigo-900/40"
                                             >
                                                 Edit
                                             </button>

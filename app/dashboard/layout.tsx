@@ -3,18 +3,19 @@ import "./dashboard.css";
 import Sidebar from "./components/sidebar";
 import Header from "./components/header";
 import BottomNav from "./components/bottomnav";
+import { headers } from "next/headers";
 
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Dashboard",
 };
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  
+
   return (
     <html lang="id" className="">
       <body className="bg-slate-100 dark:bg-slate-900 min-h-screen flex transition-colors duration-300">

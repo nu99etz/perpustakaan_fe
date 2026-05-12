@@ -12,6 +12,9 @@ export function middleware(request: NextRequest) {
   // 2. Tentukan halaman yang sedang diakses
   const { pathname } = request.nextUrl;
 
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set('x-pathname', request.nextUrl.pathname);
+
   // 3. Logika proteksi: Jika akses ke /admin tapi tidak punya token
   if (pathname.startsWith('/dashboard') && !token) {
     // Redirect ke halaman login
@@ -19,7 +22,11 @@ export function middleware(request: NextRequest) {
   }
 
   // Lanjutkan permintaan jika valid
-  return NextResponse.next();
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders
+    }
+  });
 }
 
 // 4. Konfigurasi: Tentukan rute mana saja yang akan diproses middleware
