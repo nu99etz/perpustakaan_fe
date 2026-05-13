@@ -1,19 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import { useActionState } from "react";
 import {
     createUserAction,
     deleteUserAction,
     type User,
-    getUserById
-} from "../action/useraction";
+    getUserById,
+    getAllUsers
+} from "./action/UserAction";
 import Pagination from "../../components/pagination";
+import { Paginate } from "@/app/type/Paginate";
 
 interface UserCrudProps {
-    initialUsers: User[];
+    pagination?: Paginate;
 }
 
 const emptyForm = {
@@ -24,9 +25,8 @@ const emptyForm = {
     password: ""
 };
 
-export default function UserCrud({ initialUsers }: UserCrudProps) {
-    const router = useRouter();
-    const [users, setUsers] = useState<User[]>(initialUsers);
+export default function UserCrud({ pagination }: UserCrudProps) {
+    const [users, setUsers] = useState<User[]>(pagination?.data);
     const [formValues, setFormValues] = useState({ ...emptyForm });
     const [editing, setEditing] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -35,10 +35,12 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
 
     const [createState, createAction, createPending] = useActionState(createUserAction, null);
     const [deleteState, deleteAction, deletePending] = useActionState(deleteUserAction, null);
+    const [paginationState, setPagination] = useState<Paginate>();
 
     useEffect(() => {
-        setUsers(initialUsers);
-    }, [initialUsers]);
+        setUsers(pagination?.data);
+        setPagination(pagination)
+    }, [pagination?.data, pagination]);
 
     useEffect(() => {
         if (!createState) return;
@@ -50,8 +52,8 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
 
         if (createState.status === true && createState.success?.user) {
             closeModal();
-            Swal.fire("Sukses", createState.success.successMessage ?? "User dibuat.", "success").then(() => {
-                router.refresh();
+            Swal.fire("Sukses", createState.success.successMessage ?? "User dibuat.", "success").then(async () => {
+                await fetchUsers(paginationState?.page ?? 1, paginationState?.limit ?? 10);
             });
         }
     }, [createState]);
@@ -66,7 +68,9 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
 
         if (deleteState.status === true && deleteState.success?.user?.id) {
             setUsers(prev => prev.filter(user => user.id !== deleteState.success!.user!.id));
-            Swal.fire("Sukses", deleteState.success.successMessage ?? "User dihapus.", "success");
+            Swal.fire("Sukses", deleteState.success.successMessage ?? "User dihapus.", "success").then(async () => {
+                await fetchUsers(paginationState?.page ?? 1, paginationState?.limit ?? 10);
+            });
         }
     }, [deleteState]);
 
@@ -114,6 +118,35 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
 
     function resetForm() {
         closeModal();
+    }
+
+    async function fetchUsers(page: number, limit: number) {
+        const pagination = await getAllUsers({
+            page: page,
+            limit: limit
+        });
+        setUsers(pagination.data);
+        setPagination(pagination);
+    }
+
+    function confirmDelete(id: string) {
+        Swal.fire({
+            title: "Hapus User?",
+            text: "Data user ini akan dihapus secara permanen.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ef4444",
+            cancelButtonColor: "#64748b",
+            confirmButtonText: "Ya, Hapus!",
+            cancelButtonText: "Batal",
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const formData = new FormData();
+                formData.append("id", id);
+                deleteAction(formData);
+            }
+        });
     }
 
     return (
@@ -213,7 +246,7 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
                     <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h4 className="font-bold text-slate-900 dark:text-white">Daftar User</h4>
-                            <span className="text-sm text-slate-500 dark:text-slate-400">Total: {users.length}</span>
+                            <span className="text-sm text-slate-500 dark:text-slate-400">Total: {pagination?.totalData}</span>
                         </div>
                         <button
                             type="button"
@@ -237,7 +270,7 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                                 {users.map((user, index) => (
                                     <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/40 transition-colors">
-                                        <td className="px-5 py-3 font-mono text-slate-500 text-xs">{index + 1}</td>
+                                        <td className="px-5 py-3 font-mono text-slate-500 text-xs">{(paginationState?.offset ?? 0) + (index + 1)}</td>
                                         <td className="px-5 py-3 font-medium text-slate-700 dark:text-slate-300">{user.user_name}</td>
                                         <td className="px-5 py-3 text-slate-500 dark:text-slate-400">{user.name}</td>
                                         <td className="px-5 py-3 text-slate-800 dark:text-white">{user.address}</td>
@@ -250,16 +283,14 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
                                             >
                                                 Edit
                                             </button>
-                                            <form action={deleteAction} className="inline-block">
-                                                <input type="hidden" name="id" value={user.id} />
-                                                <button
-                                                    type="submit"
-                                                    disabled={deletePending}
-                                                    className="rounded-xl border border-red-500 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 dark:border-red-400 dark:bg-red-900/20 dark:text-red-300"
-                                                >
-                                                    Hapus
-                                                </button>
-                                            </form>
+                                            <button
+                                                type="button"
+                                                onClick={() => confirmDelete(user.id)}
+                                                disabled={deletePending}
+                                                className="rounded-xl border border-red-500 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 dark:border-red-400 dark:bg-red-900/20 dark:text-red-300 disabled:cursor-not-allowed disabled:opacity-60"
+                                            >
+                                                {deletePending ? "..." : "Hapus"}
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -274,7 +305,7 @@ export default function UserCrud({ initialUsers }: UserCrudProps) {
                         </table>
                     </div>
                     {/* Pagination Layout */}
-                    <Pagination></Pagination>
+                    <Pagination pagination={paginationState} callBack={fetchUsers}></Pagination>
                 </section>
             </div>
         </div>

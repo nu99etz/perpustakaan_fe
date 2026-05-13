@@ -1,6 +1,7 @@
 "use server";
 
 import globalFn from "@/app/helper/Helper";
+import { Paginate } from "@/app/type/Paginate";
 import { cookies } from "next/headers";
 
 export type User = {
@@ -22,24 +23,40 @@ interface ServerActionResult {
     };
 }
 
-export async function getAllUsers(): Promise<User[]> {
+export async function getAllUsers({ page, limit }: { page: number, limit: number }): Promise<Paginate> {
     const data = await globalFn().send({
-        url: "http://localhost:8080/user?page=1&limit=5",
+        url: `http://localhost:8080/user?page=${page}&limit=${limit}`,
         method: "GET"
     });
-    if (data['error'] != undefined && data['error'] == 'Token tidak valid!') {
-        return [];
-    }
     let users: User[] = [];
-    for (let i = 0; i < data?.length; i++) {
-        users.push({
-            id: data[i]['id_user'],
-            user_name: data[i]['user_name'],
-            name: data[i]['nama_lengkap_user'],
-            address: data[i]['alamat']
-        })
+    let paginateData: Paginate;
+    if (data['status'] == true) {
+        if (Array.isArray(data['data'])) {
+            for (let i = 0; i < data['data'].length; i++) {
+                var dataFor = data['data'][i]
+                users.push({
+                    id: dataFor['id_user'],
+                    user_name: dataFor['user_name'],
+                    name: dataFor['nama_lengkap_user'],
+                    address: dataFor['alamat']
+                })
+            }
+        }
+    } else {
+        return {
+            message: data['message']
+        };
     }
-    return users;
+    paginateData = {
+        page: data['pagination']['current_page'],
+        limit: data['pagination']['limit'],
+        data: users,
+        message: data['message'],
+        totalData: data['pagination']['total_data'],
+        totalPage: data['pagination']['total_page'],
+        offset: data['pagination']['offset']
+    }
+    return paginateData;
 }
 
 export async function getUserById(id: string): Promise<User | null> {
@@ -47,17 +64,17 @@ export async function getUserById(id: string): Promise<User | null> {
         url: `http://localhost:8080/user?id=${id}`,
         method: "GET"
     });
-    console.log(data);
-    if (!data || data?.error) {
+
+    if (data['status'] == false) {
         return null;
     }
 
     let user: User;
     user = {
-        id: data['id_user'],
-        user_name: data['user_name'],
-        name: data['nama_lengkap_user'],
-        address: data['alamat']
+        id: data['data']['id_user'],
+        user_name: data['data']['user_name'],
+        name: data['data']['nama_lengkap_user'],
+        address: data['data']['alamat']
     };
     return user;
 }
@@ -101,8 +118,8 @@ export async function createUserAction(prevState: any, formData: FormData): Prom
         data: JSON.stringify(data)
     })
 
-    if (response?.error) {
-        return { status: false, error: { message: response?.error ?? 'Gagal membuat user.' } };
+    if (response['status'] == false) {
+        return { status: false, error: { message: response['message'] ?? 'Gagal membuat user.' } };
     }
 
     return {
@@ -120,30 +137,25 @@ export async function createUserAction(prevState: any, formData: FormData): Prom
 }
 
 export async function deleteUserAction(prevState: any, formData: FormData): Promise<ServerActionResult> {
-    const token = (await cookies()).get('token')?.value
     const id = String(formData.get('id') ?? '').trim();
 
     if (!id) {
         return { status: false, error: { message: 'ID user tidak ditemukan.' } };
     }
 
-    const res = await fetch(`http://localhost:8080/user/${id}`, {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        }
+    const response = await globalFn().send({
+        url: `http://localhost:8080/user/delete?id=${id}`,
+        method: "DELETE"
     });
 
-    const data = await res.json();
-    if (!res.ok || data?.error) {
-        return { status: false, error: { message: data?.error ?? 'Gagal menghapus user.' } };
+    if (response['status'] == false) {
+        return { status: false, error: { message: response['message'] ?? 'Gagal menghapus user.' } };
     }
 
     return {
         status: true,
         success: {
-            successMessage: data?.message ?? 'User berhasil dihapus.',
+            successMessage: response['message'] ?? 'User berhasil dihapus.',
             user: { id, user_name: '', name: '', address: '' }
         }
     };

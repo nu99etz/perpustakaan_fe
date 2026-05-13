@@ -21,9 +21,9 @@ export default async function DashboardLayout({
       <body className="bg-slate-100 dark:bg-slate-900 min-h-screen flex transition-colors duration-300">
         {/* <!-- Backdrop --> */}
         <div id="backdrop" className="hidden fixed inset-0 z-30"></div>
-        {/* <!-- ════════════════════════════════════════ SIDEBAR ══ --> */}
+        {/* SIDEBAR */}
         <Sidebar></Sidebar>
-        {/* <!-- ════════════════════════════════════════ MAIN ══ --> */}
+        {/* MAIN */}
         <main className="flex-1 lg:ml-64 pb-20 lg:pb-0">
 
           {/* <!-- Header --> */}
@@ -35,7 +35,7 @@ export default async function DashboardLayout({
           </div>
         </main>
 
-        {/* <!-- ════════════════════════════════════════ BOTTOM NAV ══ --> */}
+        {/* BOTTOM NAV */}
         <BottomNav></BottomNav>
       </body>
     </html>

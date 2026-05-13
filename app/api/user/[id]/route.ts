@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getUserById } from "../../../dashboard/master/action/useraction";
+import { getUserById } from "../../../dashboard/master/user/action/UserAction";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;

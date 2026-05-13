@@ -1,5 +1,6 @@
 "use server";
 
+import globalFn from "@/app/helper/Helper";
 import { cookies } from "next/headers";
 
 interface LoginAction {
@@ -11,7 +12,7 @@ interface LoginAction {
 }
 
 export async function loginAction(prevState: any, formData: FormData) {
-    
+
     let status = undefined;
     let response: LoginAction = {
         email: undefined,
@@ -35,35 +36,32 @@ export async function loginAction(prevState: any, formData: FormData) {
         return { error: response }
     }
 
-    const res = await fetch("http://localhost:8080/auth/login", {
+    const data = await globalFn().send({
+        url: "http://localhost:8080/auth/login",
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
+        data: JSON.stringify({
             "user_name": formData.get("username"),
             "password": formData.get("password")
         })
-    })
-    const data = await res.json();
-    if (data['error'] !== undefined) {
-        status = false;
-        response.errorMessage = data['error'];
-        return {
-            status: status,
-            error: response
-        };
-    } else {
+    });
+    if (data['status'] == true) {
         status = true;
         response.successMessage = data['message'];
-        response.token = data['token'];
-        
+        response.token = data['data']['jwt_token'];
+
         const cookieStore = await cookies();
-        cookieStore.set('token', data['token']);
+        cookieStore.set('token', data['data']['jwt_token']);
 
         return {
             status: status,
             success: response
         }
+    } else {
+        status = false;
+        response.errorMessage = data['message'];
+        return {
+            status: status,
+            error: response
+        };
     }
 }

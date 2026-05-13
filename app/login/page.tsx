@@ -1,20 +1,20 @@
 "use client";
 import { useActionState, useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import { loginAction } from "../dashboard/master/action/loginaction";
+import { loginAction } from "./action/loginaction";
 import { useRouter } from "next/navigation";
 
 interface LoginInput {
-
-}
-
-interface LoginValidation {
     email?: string,
     password?: string
 }
 
 export default function LoginPage() {
     const [state, formAction, isPending] = useActionState(loginAction, null);
+    const [loginInput, loginInputState] = useState<LoginInput>({
+        email: "",
+        password: ""
+    })
     const router = useRouter();
 
     useEffect(() => {
@@ -69,9 +69,11 @@ export default function LoginPage() {
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
                                     </div>
-                                    <input type="text" placeholder="Username" name="username"
+                                    <input type="text" placeholder="Username" name="username" value={loginInput.email}
                                         className="inp w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white text-sm placeholder-slate-400"
-                                        autoComplete="email" />
+                                        autoComplete="email" onChange={(e) => loginInputState({
+                                            email: e.target.value
+                                        })} />
                                 </div>
                                 {
                                     state?.error?.email != undefined && state?.error?.email != undefined ? <p className="text-xs text-red-500 mt-1">{state?.error?.email}</p> : ''

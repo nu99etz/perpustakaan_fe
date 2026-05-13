@@ -1,5 +1,9 @@
 export type Paginate = {
-    limit?: BigInt,
-    page?: BigInt,
+    limit?: number,
+    page?: number,
+    offset?: number,
+    totalPage?: number,
+    totalData?: number,
+    message?: string,
     data?: any
 };
