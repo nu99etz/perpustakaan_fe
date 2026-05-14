@@ -1,11 +1,13 @@
 'use client';
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Sidebar() {
 
     const router = useRouter();
 
     const pathName = usePathname();
+    const [isMasterOpen, setIsMasterOpen] = useState(pathName.includes('/dashboard/master'));
 
     return (
         <aside className="hidden lg:flex flex-col w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 fixed inset-y-0 left-0 z-20 transition-colors duration-300">
@@ -28,10 +30,29 @@ export default function Sidebar() {
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75" /></svg>
                     Keuangan
                 </a>
-                <a href="#" onClick={() => router.push('/dashboard/master/user')} className={`nav-link ${pathName == '/dashboard/master/user' ? 'active' : ''} flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors`}>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-                    Pengguna
-                </a>
+                <button
+                    onClick={() => setIsMasterOpen(!isMasterOpen)}
+                    className={`w-full nav-link ${pathName.includes('/dashboard/master') ? 'active' : ''} flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer`}
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 .621-.504 1.125-1.125 1.125h-2.25c-.621 0-1.125-.504-1.125-1.125V3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v3zM18.75 16.375c0 .621-.504 1.125-1.125 1.125h-2.25c-.621 0-1.125-.504-1.125-1.125v-3c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v3zM11.25 12.75c0 .621-.504 1.125-1.125 1.125H7.875c-.621 0-1.125-.504-1.125-1.125v-3c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v3zM11.25 21c0 .621-.504 1.125-1.125 1.125H7.875c-.621 0-1.125-.504-1.125-1.125v-3c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v3z" /></svg>
+                    <span>Master Data</span>
+                    <svg className={`w-4 h-4 ml-auto transition-transform duration-200 ${isMasterOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                </button>
+
+                <div className={`overflow-hidden transition-all duration-300 ${isMasterOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <div className="pl-4 mt-1 space-y-1 border-l-2 border-slate-100 dark:border-slate-700 ml-5">
+                        <a href="#" onClick={() => router.push('/dashboard/master/user')} className={`nav-link ${pathName == '/dashboard/master/user' ? 'active' : ''} flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors`}>
+                            <div className={`w-1.5 h-1.5 rounded-full ${pathName == '/dashboard/master/user' ? 'bg-white' : 'bg-slate-400'}`}></div>
+                            Pengguna
+                        </a>
+                        <a href="#" onClick={() => router.push('/dashboard/master/member')} className={`nav-link ${pathName == '/dashboard/master/member' ? 'active' : ''} flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors`}>
+                            <div className={`w-1.5 h-1.5 rounded-full ${pathName == '/dashboard/master/member' ? 'bg-white' : 'bg-slate-400'}`}></div>
+                            Member
+                        </a>
+                    </div>
+                </div>
                 <a href="#" className="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" /></svg>
                     Produk

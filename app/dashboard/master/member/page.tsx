@@ -1,4 +1,5 @@
 import { getAllMembers } from "./action/MemberAction";
+import MemberCrud from "./MemberCrud";
 
 export default async function MemberPage() {
     const members = await getAllMembers({
@@ -19,6 +20,7 @@ export default async function MemberPage() {
                     </span>
                 </div>
             </div>
+            <MemberCrud pagination={members} />
         </div>
     );
 }

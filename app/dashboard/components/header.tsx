@@ -1,4 +1,21 @@
+"use client";
+
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+
 export default function Header() {
+    const { theme, setTheme } = useTheme();
+    const [mounted, setMounted] = useState(false);
+
+    // Avoid hydration mismatch
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const toggleTheme = () => {
+        setTheme(theme === "dark" ? "light" : "dark");
+    };
+
     return (
         <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 lg:px-8 py-4 flex items-center justify-between sticky top-0 z-20 transition-colors duration-300">
             <div>
@@ -13,9 +30,16 @@ export default function Header() {
                 </div>
 
                 {/* <!-- Dark mode btn --> */}
-                <button className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center transition-colors" title="Toggle mode">
-                    <svg id="hdr-moon" className="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
-                    <svg id="hdr-sun" className="w-4 h-4 text-yellow-500 hidden" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+                <button 
+                    onClick={toggleTheme}
+                    className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center transition-colors hover:bg-slate-200 dark:hover:bg-slate-600" 
+                    title="Toggle mode"
+                >
+                    {mounted && theme === "dark" ? (
+                        <svg id="hdr-sun" className="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+                    ) : (
+                        <svg id="hdr-moon" className="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
+                    )}
                 </button>
 
                 {/* <!-- Notification bell --> */}
@@ -110,13 +134,16 @@ export default function Header() {
                                 Bantuan &amp; Dukungan
                             </a>
                             {/* <!-- dark toggle inside profile --> */}
-                            <div className="flex items-center justify-between px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer">
+                            <div 
+                                onClick={toggleTheme}
+                                className="flex items-center justify-between px-4 py-2.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
+                            >
                                 <div className="flex items-center gap-3">
                                     <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
                                     Mode Gelap
                                 </div>
                                 <div className="tpill w-10 h-5 rounded-full bg-slate-200 dark:bg-indigo-600 relative pointer-events-none">
-                                    <div className="tthumb absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow dark:translate-x-5"></div>
+                                    <div className={`tthumb absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${mounted && theme === "dark" ? "translate-x-5" : ""}`}></div>
                                 </div>
                             </div>
                         </div>

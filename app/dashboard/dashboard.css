@@ -116,3 +116,40 @@
 .dark ::-webkit-scrollbar-thumb {
     background: #334155;
 }
+
+/* Modal Animations */
+@keyframes modal-backdrop {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modal-backdrop-close {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes modal-content {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes modal-content-close {
+    from { opacity: 1; transform: scale(1) translateY(0); }
+    to { opacity: 0; transform: scale(0.95) translateY(10px); }
+}
+
+.animate-modal-backdrop {
+    animation: modal-backdrop 0.2s ease-out forwards;
+}
+
+.animate-modal-backdrop-close {
+    animation: modal-backdrop-close 0.2s ease-in forwards;
+}
+
+.animate-modal-content {
+    animation: modal-content 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-modal-content-close {
+    animation: modal-content-close 0.2s ease-in forwards;
+}
