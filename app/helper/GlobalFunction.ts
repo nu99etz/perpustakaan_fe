@@ -7,14 +7,14 @@ class GlobalFunction {
         const res = await fetch(url, {
             method: method,
             headers: {
-                "Content-Type": "application/json",
+                // "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
             },
             cache: 'no-store',
             body: data
         });
         const response = await res.json();
-        if(callBack != undefined) {
+        if (callBack != undefined) {
             return callBack(response);
         }
         return response;
