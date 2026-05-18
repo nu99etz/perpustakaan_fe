@@ -51,6 +51,10 @@ export default function Sidebar() {
                             <div className={`w-1.5 h-1.5 rounded-full ${pathName == '/dashboard/master/member' ? 'bg-white' : 'bg-slate-400'}`}></div>
                             Member
                         </a>
+                        <a href="#" onClick={() => router.push('/dashboard/master/book')} className={`nav-link ${pathName == '/dashboard/master/book' ? 'active' : ''} flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-colors`}>
+                            <div className={`w-1.5 h-1.5 rounded-full ${pathName == '/dashboard/master/book' ? 'bg-white' : 'bg-slate-400'}`}></div>
+                            Buku
+                        </a>
                     </div>
                 </div>
                 <a href="#" className="nav-link flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors">
