@@ -26,7 +26,10 @@ export async function getAllBooks({ page, limit }: { page: number, limit: number
                     created_at: dataFor['created_at'],
                     updated_at: dataFor['updated_at'],
                     created_by: dataFor['created_by'],
-                    deleted_at: dataFor['deleted_at']
+                    deleted_at: dataFor['deleted_at'],
+                    user: {
+                        name: dataFor['User']['nama_lengkap_user']
+                    }
                 })
             }
         }
@@ -47,66 +50,83 @@ export async function getAllBooks({ page, limit }: { page: number, limit: number
     return paginateData;
 }
 
-// export async function getMemberById(id: number): Promise<Member | null> {
-//     const data = await globalFn().send({
-//         url: `http://localhost:8080/member?id=${id}`,
-//         method: "GET"
-//     });
+export async function getBookById(id: number): Promise<Book | null> {
+    const data = await globalFn().send({
+        url: `http://localhost:8080/book?id=${id}`,
+        method: "GET"
+    });
 
-//     if (data['status'] == false) {
-//         return null;
-//     }
+    if (data['status'] == false) {
+        return null;
+    }
 
-//     let member: Member;
-//     member = {
-//         member_id: data['data']['member_id'],
-//         member_name: data['data']['member_name'],
-//         member_code: data['data']['member_code'],
-//         member_address: data['data']['member_address'],
-//         member_photo: data['data']['member_photo']
-//     };
-//     return member;
-// }
+    let book: Book;
+    book = {
+        book_id: data['data']['book_id'],
+        book_author: data['data']['book_author'],
+        book_category: data['data']['book_category'],
+        book_cover: data['data']['book_cover'],
+        book_isbn: data['data']['book_isbn'],
+        book_title: data['data']['book_title'],
+        book_year: data['data']['book_year'],
+        created_by: data['data']['created_by'],
+        created_at: data['data']['created_at'],
+        deleted_at: data['data']['deleted_at'],
+        updated_at: data['data']['updated_at']
+    };
+    return book;
+}
 
-// export async function createMemberAction(prevState: any, formData: FormData): Promise<ServerActionResult> {
-//     const memberName = String(formData.get('member_name') ?? '').trim();
-//     const memberAddress = String(formData.get('member_address') ?? '').trim();
-//     const memberId = formData.get("member_id") ? String(formData.get("member_id")) : undefined;
-//     const memberPhoto = formData.get("member_photo") as File;
+export async function createBookAction(prevState: any, formData: FormData): Promise<ServerActionResult> {
+    const bookIsbn = String(formData.get('book_isbn') ?? '').trim();
+    const bookTitle = String(formData.get('book_title') ?? '').trim();
+    const bookAuthor = String(formData.get('book_author') ?? '').trim();
+    const bookYear = String(formData.get('book_year') ?? '').trim();
+    const bookCategory = String(formData.get('book_category') ?? '').trim();
+    const bookId = formData.get("book_id") ? String(formData.get("book_id")) : undefined;
+    const bookCover = formData.get("book_cover") as File;
 
-//     if (!memberName) {
-//         return { status: false, error: { field: 'user_name', message: 'Nama member tidak boleh kosong.' } };
-//     }
+    if (!bookIsbn) {
+        return { status: false, error: { field: 'book_isbn', message: 'ISBN buku tidak boleh kosong.' } };
+    }
 
-//     if (!memberAddress) {
-//         return { status: false, error: { field: 'name', message: 'Alamat member tidak boleh kosong.' } };
-//     }
+    if (!bookTitle) {
+        return { status: false, error: { field: 'book_isbn', message: 'judul buku tidak boleh kosong.' } };
+    }
 
-//     if (!memberPhoto || memberPhoto.size == 0) {
-//         if (memberId != undefined) {
-//             formData.delete("member_photo");
-//         } else {
-//             return { status: false, error: { field: 'member_photo', message: 'Harap upload foto member.' } };
-//         }
-//     }
+    if (!bookAuthor) {
+        return { status: false, error: { field: 'book_isbn', message: 'penerbit buku tidak boleh kosong.' } };
+    }
 
-//     const response = await globalFn().send({
-//         url: memberId != undefined ? "http://localhost:8080/member/update" : "http://localhost:8080/member/create",
-//         method: memberId != undefined ? "PUT" : "POST",
-//         data: formData
-//     })
+    if (!bookYear) {
+        return { status: false, error: { field: 'book_isbn', message: 'tahun buku tidak boleh kosong.' } };
+    }
 
-//     if (response['status'] == false) {
-//         return { status: false, error: { message: response['message'] ?? 'Gagal membuat member.' } };
-//     }
+    if (!bookCategory) {
+        return { status: false, error: { field: 'book_isbn', message: 'kategori buku tidak boleh kosong.' } };
+    }
 
-//     return {
-//         status: true,
-//         success: {
-//             successMessage: response?.message ?? 'User berhasil dibuat.',
-//         }
-//     };
-// }
+    if (!bookCover || bookCover.size == 0) {
+        formData.delete("book_cover");
+    }
+
+    const response = await globalFn().send({
+        url: bookId != undefined ? "http://localhost:8080/book/update" : "http://localhost:8080/book/create",
+        method: bookId != undefined ? "PUT" : "POST",
+        data: formData
+    })
+
+    if (response['status'] == false) {
+        return { status: false, error: { message: response['message'] ?? 'Gagal membuat buku.' } };
+    }
+
+    return {
+        status: true,
+        success: {
+            successMessage: response?.message ?? 'Buku berhasil dibuat.',
+        }
+    };
+}
 
 // export async function deleteMemberAction(memberId: number): Promise<ServerActionResult> {
 //     const response = await globalFn().send({

@@ -1,3 +1,5 @@
+import { User } from "../dashboard/master/user/action/UserAction";
+
 export type Book = {
     book_id?: number;
     book_isbn?: string;
@@ -10,4 +12,5 @@ export type Book = {
     created_at?: string;
     updated_at?: string;
     deleted_at?: string;
+    user?: User;
 };

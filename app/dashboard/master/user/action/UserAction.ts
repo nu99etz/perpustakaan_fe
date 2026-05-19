@@ -5,10 +5,10 @@ import { Paginate } from "@/app/type/Paginate";
 import { cookies } from "next/headers";
 
 export type User = {
-    id: string;
-    user_name: string;
-    name: string;
-    address: string;
+    id?: string;
+    user_name?: string;
+    name?: string;
+    address?: string;
 };
 
 interface ServerActionResult {

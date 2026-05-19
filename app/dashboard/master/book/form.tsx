@@ -1,21 +1,19 @@
 "use client";
 
+import { Book } from "@/app/type/Book";
 import { useState, useRef } from "react";
-import { Member } from "./action/MemberAction";
 
-interface MemberPageProps {
+interface BookFormPageProps {
     createAction?: any;
-    formValues?: Member;
+    formValues?: Book;
     createPending?: boolean;
     resetForm?: () => void;
     editing?: boolean;
 }
 
-export default function MemberForm({ createAction, formValues, createPending, resetForm, editing }: MemberPageProps) {
-    const [preview, setPreview] = useState<string | null>(formValues != undefined ? `http://localhost:8080/uploads/${formValues.member_photo}` || null : null);
+export default function BookForm({ createAction, formValues, createPending, resetForm, editing }: BookFormPageProps) {
+    const [preview, setPreview] = useState<string | null>(formValues != undefined ? `http://localhost:8080/uploads/${formValues.book_cover}` || null : null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    console.log(createPending);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -36,12 +34,12 @@ export default function MemberForm({ createAction, formValues, createPending, re
         <div>
             <div className="flex items-start justify-between gap-4 pb-4 mb-4 border-b border-slate-200 dark:border-slate-700">
                 <div>
-                    <h4 className="text-lg font-bold text-slate-900 dark:text-white">Form Member</h4>
+                    <h4 className="text-lg font-bold text-slate-900 dark:text-white">Form Buku</h4>
                     <p className="text-sm text-slate-500 dark:text-slate-400">Gunakan form di bawah untuk menyimpan data pengguna.</p>
                 </div>
             </div>
             <form action={createAction} className="space-y-4" encType="multipart/form-data">
-                <input type="hidden" name="member_id" value={formValues?.member_id} />
+                <input type="hidden" name="book_id" value={formValues?.book_id} />
 
                 <div className="flex flex-col items-center gap-4 mb-6">
                     <div
@@ -62,12 +60,12 @@ export default function MemberForm({ createAction, formValues, createPending, re
                         </div>
                     </div>
                     <div className="text-center">
-                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Foto Member</label>
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Cover Buku</label>
                         <p className="text-xs text-slate-500 mt-1">Klik gambar untuk upload</p>
                     </div>
                     <input
                         type="file"
-                        name="member_photo"
+                        name="book_cover"
                         ref={fileInputRef}
                         onChange={handleFileChange}
                         className="hidden"
@@ -75,24 +73,56 @@ export default function MemberForm({ createAction, formValues, createPending, re
                     />
                 </div>
 
-                <div>
-                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Nama Member</label>
-                    <input
-                        name="member_name"
-                        defaultValue={formValues?.member_name}
-                        className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                        placeholder="nama member"
-                    />
+                <div className="grid grid-flow-col grid-rows-3 gap-4">
+                    <div className="row-span-3">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Kode ISBN</label>
+                        <input
+                            name="book_isbn"
+                            defaultValue={formValues?.book_isbn}
+                            className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                            placeholder="kode isbn"
+                        />
+                    </div>
+                    <div className="row-span-3">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Judul Buku</label>
+                        <input
+                            name="book_title"
+                            defaultValue={formValues?.book_title}
+                            className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                            placeholder="judul buku"
+                        />
+                    </div>
                 </div>
-                <div>
-                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Alamat Member</label>
-                    <textarea
-                        name="member_address"
-                        defaultValue={formValues?.member_address}
-                        className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 text-sm shadow-sm resize-none focus:ring-2 focus:ring-indigo-500 outline-none transition"
-                        placeholder="Alamat"
-                        rows={4}
-                    />
+
+                <div className="grid grid-flow-col grid-rows-3 gap-4">
+                    <div className="row-span-3">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Penerbit Buku</label>
+                        <input
+                            name="book_author"
+                            defaultValue={formValues?.book_author}
+                            className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                            placeholder="Penerbit Buku"
+                        />
+                    </div>
+                    <div className="row-span-3">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Tahun Buku</label>
+                        <input
+                            name="book_year"
+                            defaultValue={formValues?.book_year}
+                            className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                            placeholder="tahun buku"
+                            type="number"
+                        />
+                    </div>
+                    <div className="row-span-3">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Kategori Buku</label>
+                        <input
+                            name="book_category"
+                            defaultValue={formValues?.book_category}
+                            className="mt-2 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-3 text-sm shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                            placeholder="kategori buku"
+                        />
+                    </div>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end pt-4">
                     <button
@@ -107,7 +137,7 @@ export default function MemberForm({ createAction, formValues, createPending, re
                         disabled={createPending}
                         className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-50 shadow-md shadow-indigo-200 dark:shadow-none"
                     >
-                        {editing ? (createPending ? "Menyimpan..." : "Perbarui Member") : (createPending ? "Menyimpan..." : "Simpan Member")}
+                        {editing ? (createPending ? "Menyimpan..." : "Perbarui Buku") : (createPending ? "Menyimpan..." : "Simpan Buku")}
                     </button>
                 </div>
             </form>
