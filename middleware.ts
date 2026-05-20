@@ -7,8 +7,6 @@ export function middleware(request: NextRequest) {
   // 1. Ambil token dari cookies
   const token = request.cookies.get('token')?.value;
 
-  console.log(token)
-
   // 2. Tentukan halaman yang sedang diakses
   const { pathname } = request.nextUrl;
 
@@ -19,6 +17,10 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith('/dashboard') && !token) {
     // Redirect ke halaman login
     return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  if(pathname.startsWith('/login') && token) {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   // Lanjutkan permintaan jika valid
@@ -32,6 +34,7 @@ export function middleware(request: NextRequest) {
 // 4. Konfigurasi: Tentukan rute mana saja yang akan diproses middleware
 export const config = {
   matcher: [
+    '/login/:path*',
     '/dashboard/:path*',
   ],
 };

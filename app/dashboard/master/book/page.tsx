@@ -1,7 +1,7 @@
 'use client';
 import { Book } from "@/app/type/Book";
 import { useActionState, useEffect, useState } from "react";
-import { createBookAction, getAllBooks, getBookById } from "./action/BookAction";
+import { createBookAction, deletBookAction, getAllBooks, getBookById } from "./action/BookAction";
 import Modal from "../../components/modal";
 import { Paginate } from "@/app/type/Paginate";
 import Pagination from "../../components/pagination";
@@ -13,6 +13,7 @@ export default function MemberPage() {
     const [books, setBooks] = useState<Book[]>([]);
     const [pagination, setPagination] = useState<Paginate>();
     const [isLoading, setLoadingState] = useState(false);
+    const [deleteAction, setDeleteState] = useState(false);
     const { openModal, closeModal } = useModal();
 
     const [createState, createAction, createPending] = useActionState(createBookAction, null);
@@ -62,6 +63,35 @@ export default function MemberPage() {
         } finally {
             setLoadingState(false);
         }
+    }
+
+    function confirmDelete(bookId: number) {
+        Swal.fire({
+            title: "Hapus Buku?",
+            text: "Data buku ini akan dihapus secara permanen.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ef4444",
+            cancelButtonColor: "#64748b",
+            confirmButtonText: "Ya, Hapus!",
+            cancelButtonText: "Batal",
+            reverseButtons: true,
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                setDeleteState(true);
+                const result = await deletBookAction(bookId);
+                if (!result.status) {
+                    Swal.fire("Error", result?.error?.message, "error").then(() => {
+                        setDeleteState(false);
+                    });
+                } else {
+                    Swal.fire("Sukses", result?.success?.successMessage, "success").then(async () => {
+                        setDeleteState(false);
+                        await fetchBooks();
+                    });
+                }
+            }
+        });
     }
 
     return (
@@ -141,14 +171,14 @@ export default function MemberPage() {
                                                 >
                                                     Edit
                                                 </button>
-                                                {/* <button
+                                                <button
                                                     type="button"
-                                                    onClick={() => confirmDelete(member.member_id!)}
+                                                    onClick={() => confirmDelete(book.book_id!)}
                                                     disabled={deleteAction}
                                                     className="rounded-xl border border-red-500 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 dark:border-red-400 dark:bg-red-900/20 dark:text-red-300 disabled:cursor-not-allowed disabled:opacity-60"
                                                 >
                                                     {deleteAction ? "Proses Hapus ..." : "Hapus"}
-                                                </button> */}
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}

@@ -277,7 +277,7 @@ export default function UserCrud({ pagination }: UserCrudProps) {
                                         <td className="px-5 py-3 space-x-2">
                                             <button
                                                 type="button"
-                                                onClick={() => startEdit(user.id)}
+                                                onClick={() => startEdit(user.id!)}
                                                 disabled={loadingUser}
                                                 className="rounded-xl border border-indigo-500 px-3 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-indigo-400 dark:text-indigo-300 dark:hover:bg-indigo-900/40"
                                             >
@@ -285,7 +285,7 @@ export default function UserCrud({ pagination }: UserCrudProps) {
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={() => confirmDelete(user.id)}
+                                                onClick={() => confirmDelete(user.id!)}
                                                 disabled={deletePending}
                                                 className="rounded-xl border border-red-500 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-100 dark:border-red-400 dark:bg-red-900/20 dark:text-red-300 disabled:cursor-not-allowed disabled:opacity-60"
                                             >

@@ -95,15 +95,15 @@ export async function createBookAction(prevState: any, formData: FormData): Prom
     }
 
     if (!bookAuthor) {
-        return { status: false, error: { field: 'book_isbn', message: 'penerbit buku tidak boleh kosong.' } };
+        return { status: false, error: { field: 'book_author', message: 'penerbit buku tidak boleh kosong.' } };
     }
 
     if (!bookYear) {
-        return { status: false, error: { field: 'book_isbn', message: 'tahun buku tidak boleh kosong.' } };
+        return { status: false, error: { field: 'book_year', message: 'tahun buku tidak boleh kosong.' } };
     }
 
     if (!bookCategory) {
-        return { status: false, error: { field: 'book_isbn', message: 'kategori buku tidak boleh kosong.' } };
+        return { status: false, error: { field: 'book_category', message: 'kategori buku tidak boleh kosong.' } };
     }
 
     if (!bookCover || bookCover.size == 0) {
@@ -128,20 +128,20 @@ export async function createBookAction(prevState: any, formData: FormData): Prom
     };
 }
 
-// export async function deleteMemberAction(memberId: number): Promise<ServerActionResult> {
-//     const response = await globalFn().send({
-//         url: `http://localhost:8080/member/delete?id=${memberId}`,
-//         method: "DELETE"
-//     });
+export async function deletBookAction(bookId: number): Promise<ServerActionResult> {
+    const response = await globalFn().send({
+        url: `http://localhost:8080/book/delete?id=${bookId}`,
+        method: "DELETE"
+    });
 
-//     if (response['status'] == false) {
-//         return { status: false, error: { message: response['message'] ?? 'Gagal menghapus member.' } };
-//     }
+    if (response['status'] == false) {
+        return { status: false, error: { message: response['message'] ?? 'Gagal menghapus buku.' } };
+    }
 
-//     return {
-//         status: true,
-//         success: {
-//             successMessage: response['message'] ?? 'Member berhasil dihapus.'
-//         }
-//     };
-// }
+    return {
+        status: true,
+        success: {
+            successMessage: response['message'] ?? 'Buku berhasil dihapus.'
+        }
+    };
+}
